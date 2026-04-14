@@ -211,12 +211,11 @@ export class CheckoutComponent {
   private readonly orderService = inject(OrderService);
   private readonly router = inject(Router);
 
-  // ============ STATE ============
   readonly submitting = signal(false);
   readonly orderSuccess = signal(false);
   readonly error = signal<string | null>(null);
 
-  selectedPayment = 'cmi';
+  selectedPayment = 'cash';
 
   form = {
     name: '',
@@ -229,7 +228,10 @@ export class CheckoutComponent {
   readonly cities = [
     'Casablanca', 'Rabat', 'Marrakech', 'Fès',
     'Tanger', 'Agadir', 'Oujda', 'Meknès',
-    'Kénitra', 'Tétouan', 'Safi', 'El Jadida'
+    'Kénitra', 'Tétouan', 'Safi', 'El Jadida',
+    'Berrechid', 'Khouribga', 'Nador', 'Beni Mellal',
+    'Settat', 'Larache', 'Ksar El Kebir', 'Taza',
+    'Guelmim', 'Ouarzazate', 'Dakhla',
   ];
 
   readonly paymentMethods = [
@@ -237,7 +239,7 @@ export class CheckoutComponent {
       value: 'cmi',
       icon: '💳',
       label: 'Carte bancaire',
-      description: 'Paiement sécurisé via CMI'
+      description: 'Paiement sécurisé via Stripe'
     },
     {
       value: 'cash',
@@ -246,17 +248,31 @@ export class CheckoutComponent {
       description: 'Cash ou chèque'
     }
   ];
+  private isFormValid(): boolean {
+  return !!(
+    this.form.name &&
+    this.form.phone &&
+    this.form.address &&
+    this.form.city
+  );
+}
 
-  // ============ METHODS ============
   placeOrder(): void {
     if (!this.isFormValid()) {
       this.error.set('Veuillez remplir tous les champs obligatoires.');
       return;
     }
-
     this.submitting.set(true);
     this.error.set(null);
 
+    if (this.selectedPayment === 'cash') {
+      this.placeOrderCash();
+    } else {
+      this.placeOrderStripe();
+    }
+  }
+
+  private placeOrderCash(): void {
     const orderData: OrderRequest = {
       items: this.cart.cartItems().map(i => ({
         productId: i.product.id,
@@ -264,7 +280,8 @@ export class CheckoutComponent {
       })),
       shippingAddress: this.form.address,
       city: this.form.city,
-      phone: this.form.phone
+      phone: this.form.phone,
+      paymentMethod: 'CASH'
     };
 
     this.orderService.createOrder(orderData).subscribe({
@@ -274,18 +291,42 @@ export class CheckoutComponent {
         this.submitting.set(false);
       },
       error: () => {
-        this.error.set('Erreur lors de la commande. Veuillez réessayer.');
+        this.error.set('Erreur lors de la commande. Réessayez.');
         this.submitting.set(false);
       }
     });
   }
+private placeOrderStripe(): void {
+  // Calculer le total
+  const total = this.cart.finalTotal();
 
-  private isFormValid(): boolean {
-    return !!(
-      this.form.name.trim() &&
-      this.form.phone.trim() &&
-      this.form.address.trim() &&
-      this.form.city
-    );
-  }
+  this.orderService.createStripeCheckout({
+    amount: total,
+    currency: 'mad',
+    description: 'Commande SaadStore',
+    items: this.cart.cartItems().map(i => ({
+      productId: i.product.id,
+      quantity: i.quantity
+    })),
+    shippingAddress: this.form.address,
+    city: this.form.city,
+    phone: this.form.phone
+  }).subscribe({
+    next: (res: any) => {
+      // Stripe retourne cmiPaymentUrl
+      const url = res.cmiPaymentUrl || res.url;
+      if (url) {
+        window.location.href = url;
+      } else {
+        this.error.set('URL de paiement manquante.');
+        this.submitting.set(false);
+      }
+    },
+    error: (err) => {
+      console.error('Stripe error:', err);
+      this.error.set('Erreur paiement. Vérifiez la console.');
+      this.submitting.set(false);
+    }
+  });
+}
 }

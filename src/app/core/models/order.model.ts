@@ -29,10 +29,11 @@ export interface CartItem {
   product: Product;
   quantity: number;
 }
-
 export interface OrderRequest {
   items: { productId: string; quantity: number }[];
   shippingAddress: string;
   city: string;
   phone: string;
+  paymentMethod?: 'CASH' | 'CMI' | 'STRIPE';
 }
+

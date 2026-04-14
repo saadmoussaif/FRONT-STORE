@@ -37,4 +37,9 @@ export class OrderService {
       { params }
     );
   }
+  createStripeCheckout(data: any): Observable<any> {
+  return this.http.post<any>(
+    `${this.API}/payment/checkout`, data
+  );
+}
 }

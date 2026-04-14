@@ -201,7 +201,7 @@ export class NavbarComponent {
   }
 
   logout(): void {
-    this.userMenuOpen = false;
+    this.menuOpen = false;
     this.auth.logout();
   }
 }

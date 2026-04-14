@@ -1,5 +1,3 @@
-
-
 import { Injectable, signal, computed } from '@angular/core';
 import Keycloak from 'keycloak-js';
 
@@ -8,7 +6,6 @@ export class AuthService {
 
   private keycloak: Keycloak | null = null;
 
-  // ============ STATE ============
   private readonly _isLoggedIn = signal(false);
   private readonly _userProfile = signal<any>(null);
   private readonly _roles = signal<string[]>([]);
@@ -28,16 +25,13 @@ export class AuthService {
   readonly userName = computed(() => {
     const profile = this._userProfile();
     if (!profile) return 'Utilisateur';
-    return profile.firstName
-      ?? profile.username
-      ?? 'Utilisateur';
+    return profile.firstName ?? profile.username ?? 'Utilisateur';
   });
 
   readonly userEmail = computed(() =>
     this._userProfile()?.email ?? ''
   );
 
-  // ============ INIT ============
   async init(): Promise<void> {
     this.keycloak = new Keycloak({
       url: 'http://localhost:8180',
@@ -48,10 +42,9 @@ export class AuthService {
     try {
       const authenticated = await this.keycloak.init({
         onLoad: 'check-sso',
-        silentCheckSsoRedirectUri:
-          window.location.origin + '/assets/silent-check-sso.html',
         pkceMethod: 'S256',
-        checkLoginIframe: false
+        checkLoginIframe: false,
+        silentCheckSsoFallback: false,
       });
 
       this._isLoggedIn.set(authenticated);
@@ -61,14 +54,14 @@ export class AuthService {
         this.scheduleTokenRefresh();
       }
     } catch (error) {
-      console.error('Keycloak init error:', error);
+      console.warn('Keycloak non disponible — mode public activé');
+      this._isLoggedIn.set(false);
     }
   }
 
-  // ============ AUTH ACTIONS ============
   async login(): Promise<void> {
     await this.keycloak?.login({
-      redirectUri: window.location.origin + '/'
+      redirectUri: window.location.origin + '/admin'
     });
   }
 
@@ -94,7 +87,6 @@ export class AuthService {
     });
   }
 
-  // ============ TOKEN ============
   getToken(): string | undefined {
     return this.keycloak?.token;
   }
@@ -119,7 +111,6 @@ export class AuthService {
     }, 60000);
   }
 
-  // ============ PROFILE ============
   private async loadUserProfile(): Promise<void> {
     try {
       const profile = await this.keycloak?.loadUserProfile();
