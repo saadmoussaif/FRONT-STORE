@@ -35,5 +35,7 @@ export interface OrderRequest {
   city: string;
   phone: string;
   paymentMethod?: 'CASH' | 'CMI' | 'STRIPE';
+   customerEmail?: string;
+  customerName?: string;
 }
 

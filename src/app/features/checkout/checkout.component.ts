@@ -281,7 +281,9 @@ export class CheckoutComponent {
       shippingAddress: this.form.address,
       city: this.form.city,
       phone: this.form.phone,
-      paymentMethod: 'CASH'
+      paymentMethod: 'CASH',
+    customerEmail: this.form.email,   
+  customerName: this.form.name
     };
 
     this.orderService.createOrder(orderData).subscribe({
@@ -310,7 +312,11 @@ private placeOrderStripe(): void {
     })),
     shippingAddress: this.form.address,
     city: this.form.city,
-    phone: this.form.phone
+    phone: this.form.phone,
+    customerEmail: this.form.email,   
+  customerName: this.form.name  
+
+
   }).subscribe({
     next: (res: any) => {
       // Stripe retourne cmiPaymentUrl
