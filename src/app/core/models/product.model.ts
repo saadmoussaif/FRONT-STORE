@@ -1,5 +1,4 @@
 export type Category = 'HOMME' | 'FEMME' | 'ENFANT' | 'ACCESSOIRES';
-
 export interface Product {
   id: string;
   name: string;
@@ -7,7 +6,8 @@ export interface Product {
   price: number;
   stock: number;
   imageUrl: string;
-  category: Category;
+  brand: string;        // ← ajoute
+  category: 'HOMME' | 'FEMME' | 'ENFANT' | 'ACCESSOIRES';
   size: string;
   color: string;
   active: boolean;

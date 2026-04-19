@@ -4,21 +4,16 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['Barlow', 'sans-serif'],
       },
       colors: {
-        brand: {
-          50:  '#fdf2f8',
-          100: '#fce7f3',
-          200: '#fbcfe8',
-          400: '#f472b6',
-          500: '#ec4899',
-          600: '#db2777',
-          700: '#be185d',
-        }
-      },
-      backgroundImage: {
-        'gradient-sport': 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)',
+        navy: {
+          800: '#0a1628',
+          700: '#162040',
+          600: '#1e3a5f',
+          500: '#2563a8',
+        },
+        brand: '#f97316',
       }
     },
   },
