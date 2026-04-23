@@ -6,6 +6,7 @@ export interface Product {
   price: number;
   stock: number;
   imageUrl: string;
+    originalPrice?: number;
   brand: string;        // ← ajoute
   category: 'HOMME' | 'FEMME' | 'ENFANT' | 'ACCESSOIRES';
   size: string;
